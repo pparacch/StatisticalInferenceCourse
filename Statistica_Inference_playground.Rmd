@@ -32,8 +32,15 @@ calc_prob <- (0.75 * 1.5) / 2
 calc_prob
 ```
  The given PDF is a special case of a well-known probaility distibution, the **BETA distribution**. The sameprobability can be calculated using the **BETA distribution** as in the following code chunk
-```{r collapse = TRUE}
+```{r collapse = FALSE}
 pbeta(0.75,2,1)
+
+#What's the probability that 40%, 50% and 60% of the calls or fewere are addressed on the same day
+#F(x), given x = 0.4, 0.5, 0.6
+pbeta(c(0.4, 0.5, 0.6), 2, 1)
+
+#And the survival function is 1 - F(x)
+1 - pbeta(c(0.4, 0.5, 0.6), 2, 1)
 ```
 
 Some more details about the **BETA** distribution
@@ -44,3 +51,9 @@ p <- pbeta(x, 2, 1) #probability of being less than x
 plot(x, d, type = "l")
 lines(x, p, type= "l", col = "red")
 ```
+
+Qualtiles/ percentiles for the **BETA** distribution can be calculated 
+```{r}
+qbeta(0.5, 2, 1) #0.5 quantile, 50% percentile or population median
+```
+
