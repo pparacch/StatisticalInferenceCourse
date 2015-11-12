@@ -28,8 +28,8 @@ Let´s simulate an experiment with a random variable $X$ with an __exponential d
 For building the distribution of averages we will run thousands of simulation and for each simulation the following steps are executed:
 
 * run the experiment $n$ time where `n = 40, 80, 120, 160`,
-    * be $X_i$ the outcome for the experiment $i =1..n$.
-* calculate the mean $\bar X_n$ using $X_1, X_2, .., X_40$ 
+    * be $X_i$ the outcome for the experiment $i =1..n$
+* calculate the mean $\bar X_n$ using $X_1, X_2, .., X_n$ 
 * calculate $\frac{\bar X_n - \mu}{\sigma / \sqrt{n}}$
 
 The following the code snippet can be used to generate the simulation data.
@@ -64,7 +64,7 @@ Based on the __CLT__ the __theoretical variance__ is $\sigma^2=1$ and the value 
 ```
 
 ##Distribution
-Let´s plot the distribution of the averages previously calculated over all of the simulations together with the standard normal distribution $N(0,1)$. We can see from the plot below, the distribution of averages ($\frac{\bar X_n - \mu}{\sigma / \sqrt{n}}$) is a good approximation of a standard normal distribution $N(0,1)$  (black curve) as expected from the Central Limit Theorem.
+Let´s plot the distribution of the averages for `n = 40, 80, 120, 160` previously calculated over all of the simulations together with the standard normal distribution $N(0,1)$ (black bell curve). We can see from the plot below that the distribution of averages ($\frac{\bar X_n - \mu}{\sigma / \sqrt{n}}$) for `n = 40` is already a good approximation of the standard normal distribution $N(0,1)$ and gets better and better increasing the size of `n` as expected from the Central Limit Theorem.
 
 ```{r ref.label="plotGeneration", message=FALSE, warning=FALSE, echo=FALSE, fig.height=5, fig.width=9}
 ```
