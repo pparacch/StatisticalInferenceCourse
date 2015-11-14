@@ -88,3 +88,80 @@ myHist <- function(mu){
 }
 manipulate(myHist(mu), mu = slider(62, 74, step = 0.5))
 ```
+#t confidence interval
+##Ex1
+Load the data set mtcars in the datasets R package. Calculate a 95% confidence interval to
+the nearest MPG for the variable mpg.
+
+We know just few obs. (30 obs.) and we do not have any information about the distribution of the original population. Let´s assume that the underlying data are iid Gaussian/ normal so we can assumen that $$ \frac{\bar X - \mu}{S/\sqrt{n}} $$ foloows a t distribution with n-1 degrees of freedom.
+
+
+```{r ex1, collapse=TRUE}
+library(datasets)
+data(mtcars)
+str(mtcars)
+#32 obs and 11 variables
+
+sampleMean <- mean(mtcars$mpg)
+sampleSd <- sd(mtcars$mpg)
+n <- length(mtcars$mpg)
+#intervals 
+round(sampleMean + c(-1,1) * qt(0.975,n) * (sampleSd / sqrt(n)))
+
+#or using t.test
+round(t.test(mtcars$mpg)$conf.int)
+
+```
+
+##Ex2
+Suppose that standard deviation of 9 paired differences is $1$. What value would the average difference have to be so that the lower endpoint of a 95% students t confidence interval touches
+zero?
+
+```{r ex2}
+n <- 9 #obs.
+sampleMean <- (1 / sqrt(n)) * qt(0.975,n-1)
+```
+
+##Ex3
+An independent group Student's T interval is used instead of a paired T interval when:
+
+We can't pair them if the groups are independent of each other as well as independent within themselves.
+
+A paired interval is for paired observations.
+
+##Ex4
+Consider the mtcars dataset. Construct a 95% T interval for MPG comparing 4 to 6 cylinder cars (subtracting in the order of 4 - 6) assume a constant variance.
+
+```{r ex4}
+data(mtcars)
+group1 <- mtcars$mpg[mtcars$cyl == 4]
+group2 <- mtcars$mpg[mtcars$cyl == 6]
+
+round(t.test(group1,group2, paired = FALSE, var.equal = TRUE)$conf.int, 1)
+```
+Calculated confidence interval is
+3.2 10.7
+attr(,"conf.level")
+[1] 0.95
+
+Refer back to comparing MPG for 4 versus 6 cylinders. What do you conclude?
+The interval is above zero, suggesting 4 is better than 6 in the terms of MPG
+
+##Ex5
+Suppose that 18 obese subjects were randomized, 9 each, to a new diet pill and a placebo. Subjects' body mass indices (BMIs) were measured at a baseline and again after having received the treatment or placebo for four weeks. The average difference from follow-up to the baseline (followup - baseline) was 3 kg/m2 for the treated group and 1 kg/m2 for the placebo group. The corresponding standard deviations of the differences was 1.5 kg/m2 for the treatment group and 1.8 kg/m2 for the placebo group. The study aims to answer whether the change in BMI over the four week period appear to differ between the treated and placebo groups.
+What is the pooled variance estimate? (to 2 decimal places)
+
+```{e ex5}
+n <- 18
+#group1 (g1) new diet pill, group2 (g2) placebo
+n_g1 <- 9 
+n_g2 <- 9
+sampleMeanDiff_g1 <- 3
+sampleMeanDiff_g2 <- 1
+sampleSdDiff_g1 <- 1.5
+sampleSdDiff_g2 <- 1.8
+
+pve <- ((n_g1 -1) * sampleSdDiff_g1^2 + (n_g2 -1) * sampleSdDiff_g2^2)/(n_g1 + n_g2 -2)
+round(pve,2)
+#The sample sizes are equal, so the pooled variance is the average of the individual variances
+```
