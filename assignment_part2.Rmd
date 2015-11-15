@@ -1,0 +1,112 @@
+---
+title: "ToothGrowth Data Analysis"
+author: "Pier Lorenzo Paracchini"
+output: html_document
+---
+```{r settingsAndDependencies, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+Sys.setlocale("LC_ALL", "C")
+```
+##Overview
+The goal is to analyze the ToothGrowth data in the R datasets package, performing some exploratory analysis, and then use confidence intervals and/or hypothesis tests to compare tooth growth by `supp` and `dose`. 
+
+Description of the data from the documentation _"The response is the length of odontoblasts (teeth) in each of 10 guinea pigs at each of three dose levels of Vitamin C (0.5, 1, and 2 mg) with each of two delivery methods (orange juice or ascorbic acid)."_
+
+##Getting and Exploring the data
+```{r dataStructure, collpase = TRUE}
+require(datasets)
+rawData <- ToothGrowth
+str(rawData)
+```
+The rawdata includes `r dim(rawData)[1]` obs. of `r dim(rawData)[2]` features. Features are `len` the tooth length (`numeric`), `supp` the supplement type (`factor`) and finally `dose` the dose in milligrams (`numeric`),
+
+
+The rawdata includes 6 possible groups by `supp` and `dose` (see the plot below). For each supplement `supp` ("OJ" and "VC"), there are three different groups based on the possible `dose`s - 0.5mg, 1mg, 2mg.
+
+```{r ref.label="basicPlot", echo=FALSE}
+```
+
+And here some basic statics about the sample tooth length for each group.
+```{r ref.label="basicStatistics", echo=FALSE}
+```
+Supp | Dose | No of Sample | Sample mean | Sample SD 
+---- | ---- | ---- | ---- | ----
+"OJ" | 0.5 | `r n_OJ_05` | `r round(mean_OJ_05, 3)` | `r round(sd_OJ_05,3)` 
+"OJ" | 1.0 | `r n_OJ_10` | `r round(mean_OJ_10, 3)` | `r round(sd_OJ_10,3)`
+"OJ" | 2.0 | `r n_OJ_20` | `r round(mean_OJ_20, 3)` | `r round(sd_OJ_20,3)` 
+"VC" | 0.5 | `r n_VC_05` | `r round(mean_VC_05, 3)` | `r round(sd_VC_05,3)` 
+"VC" | 1.0 | `r n_VC_10` | `r round(mean_VC_10, 3)` | `r round(sd_VC_10,3)`
+"VC" | 2.0 | `r n_VC_20` | `r round(mean_VC_20, 3)` | `r round(sd_VC_20,3)` 
+
+##Confidence Intervals & Hypothesis Testing
+###Basic Assumptions
+Having each group has a limited number of sample (10 sample) then `t distribution` and `t confidence intervals` are going to be used. Being the guinea pigs used for each measurement distinct from each other within a group and between the groups then the __groups can be considered independent from each other__. Finally looking at the sample standard deviation for the different groups the assumption can be made to treat the diffent variances as equals. 
+###Independent group t confident intervals
+```{r ref.label="confidenceIntervals", echo=FALSE}
+```
+
+##Appendix
+Code used to create the basic plot to visualize basic information of the rawData. 
+```{r basicPlot}
+require(graphics)
+par(ps = 8, cex.lab = 0.8)
+coplot(len ~ dose | supp, data = rawData, panel = panel.smooth, xlab = "ToothGrowth data: length vs dose, given type of supplement")
+```
+
+Code used to calculate basic statistics
+```{r basicStatistics}
+##OJ - Orange Juice
+s_lenData_OJ_05 <- rawData[rawData$supp == "OJ" & rawData$dose == 0.5,]$len
+n_OJ_05 <- length(s_lenData_OJ_05)
+mean_OJ_05 <- mean(s_lenData_OJ_05)
+sd_OJ_05 <- sd(s_lenData_OJ_05)
+
+s_lenData_OJ_10 <- rawData[rawData$supp == "OJ" & rawData$dose == 1.0,]$len
+n_OJ_10 <- length(s_lenData_OJ_10)
+mean_OJ_10 <- mean(s_lenData_OJ_10)
+sd_OJ_10 <- sd(s_lenData_OJ_10)
+
+s_lenData_OJ_20 <- rawData[rawData$supp == "OJ" & rawData$dose == 2.0,]$len
+n_OJ_20 <- length(s_lenData_OJ_20)
+mean_OJ_20 <- mean(s_lenData_OJ_20)
+sd_OJ_20 <- sd(s_lenData_OJ_20)
+
+##VC - ascorbic acid
+s_lenData_VC_05 <- rawData[rawData$supp == "VC" & rawData$dose == 0.5,]$len
+n_VC_05 <- length(s_lenData_VC_05)
+mean_VC_05 <- mean(s_lenData_VC_05)
+sd_VC_05 <- sd(s_lenData_VC_05)
+
+s_lenData_VC_10 <- rawData[rawData$supp == "VC" & rawData$dose == 1.0,]$len
+n_VC_10 <- length(s_lenData_VC_10)
+mean_VC_10 <- mean(s_lenData_VC_10)
+sd_VC_10 <- sd(s_lenData_VC_10)
+
+s_lenData_VC_20 <- rawData[rawData$supp == "VC" & rawData$dose == 2.0,]$len
+n_VC_20 <- length(s_lenData_VC_20)
+mean_VC_20 <- mean(s_lenData_VC_20)
+sd_VC_20 <- sd(s_lenData_VC_20)
+```
+
+
+```{r confidenceIntervals}
+print("OJ 05 vs. 10")
+t.test(s_lenData_OJ_05, s_lenData_OJ_10, paired = FALSE, var.equal = TRUE)
+print("OJ 05 vs. 20")
+t.test(s_lenData_OJ_05, s_lenData_OJ_20, paired = FALSE, var.equal = TRUE)
+print("OJ 10 vs. 20")
+t.test(s_lenData_OJ_10, s_lenData_OJ_20, paired = FALSE, var.equal = TRUE)
+
+print("VC 05 vs. 10")
+t.test(s_lenData_VC_05, s_lenData_VC_10, paired = FALSE, var.equal = TRUE)
+print("VC 05 vs. 20")
+t.test(s_lenData_VC_05, s_lenData_VC_20, paired = FALSE, var.equal = TRUE)
+print("VC 10 vs. 20")
+t.test(s_lenData_VC_10, s_lenData_VC_20, paired = FALSE, var.equal = TRUE)
+
+print("OJ 05 vs. VC 05")
+t.test(s_lenData_OJ_05, s_lenData_VC_05, paired = FALSE, var.equal = TRUE)
+print("OJ 10 vs.VC 10")
+t.test(s_lenData_OJ_10, s_lenData_VC_10, paired = FALSE, var.equal = TRUE)
+print("OJ 20 vs. VC 20")
+t.test(s_lenData_OJ_20, s_lenData_VC_20, paired = FALSE, var.equal = TRUE)
+```
