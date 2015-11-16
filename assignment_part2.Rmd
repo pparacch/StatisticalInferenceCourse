@@ -3,7 +3,7 @@ title: "ToothGrowth Data Analysis"
 author: "Pier Lorenzo Paracchini"
 output: html_document
 ---
-```{r settingsAndDependencies, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+```{r settings, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
 Sys.setlocale("LC_ALL", "C")
 ```
 ##Overview
@@ -17,43 +17,122 @@ require(datasets)
 rawData <- ToothGrowth
 str(rawData)
 ```
-The rawdata includes `r dim(rawData)[1]` obs. of `r dim(rawData)[2]` features. Features are `len` the tooth length (`numeric`), `supp` the supplement type (`factor`) and finally `dose` the dose in milligrams (`numeric`),
-
-
-The rawdata includes 6 possible groups by `supp` and `dose` (see the plot below). For each supplement `supp` ("OJ" and "VC"), there are three different groups based on the possible `dose`s - 0.5mg, 1mg, 2mg.
+The rawdata includes `r dim(rawData)[1]` obs. of `r dim(rawData)[2]` features. Features are `len` the tooth length (`numeric`), `supp` the supplement type (`factor`) and finally `dose` the dose in milligrams (`numeric`). There are 6 possible groups by `supp` and `dose` (see the plot below). For each supplement `supp` ("OJ" and "VC"), there are three different groups based on the `dose` values - 0.5mg, 1mg, 2mg.
 
 ```{r ref.label="basicPlot", echo=FALSE}
 ```
 
 And here some basic statics about the sample tooth length for each group.
+```{r ref.label="prepareDataGroups", echo=FALSE}
+```
 ```{r ref.label="basicStatistics", echo=FALSE}
 ```
 Supp | Dose | No of Sample | Sample mean | Sample SD 
 ---- | ---- | ---- | ---- | ----
-"OJ" | 0.5 | `r n_OJ_05` | `r round(mean_OJ_05, 3)` | `r round(sd_OJ_05,3)` 
-"OJ" | 1.0 | `r n_OJ_10` | `r round(mean_OJ_10, 3)` | `r round(sd_OJ_10,3)`
-"OJ" | 2.0 | `r n_OJ_20` | `r round(mean_OJ_20, 3)` | `r round(sd_OJ_20,3)` 
-"VC" | 0.5 | `r n_VC_05` | `r round(mean_VC_05, 3)` | `r round(sd_VC_05,3)` 
-"VC" | 1.0 | `r n_VC_10` | `r round(mean_VC_10, 3)` | `r round(sd_VC_10,3)`
-"VC" | 2.0 | `r n_VC_20` | `r round(mean_VC_20, 3)` | `r round(sd_VC_20,3)` 
+"OJ" | 0.5 | `r stats_OJ_05$n` | `r stats_OJ_05$mean` | `r stats_OJ_05$sd` 
+"OJ" | 1.0 | `r stats_OJ_10$n` | `r stats_OJ_10$mean` | `r stats_OJ_10$sd`
+"OJ" | 2.0 | `r stats_OJ_20$n` | `r stats_OJ_20$mean` | `r stats_OJ_20$sd`
+--- | --- | --- | --- | ---
+"VC" | 0.5 | `r stats_VC_05$n` | `r stats_VC_05$mean` | `r stats_VC_05$sd` 
+"VC" | 1.0 | `r stats_VC_10$n` | `r stats_VC_10$mean` | `r stats_VC_10$sd`
+"VC" | 2.0 | `r stats_VC_20$n` | `r stats_VC_20$mean` | `r stats_VC_20$sd` 
 
 ##Confidence Intervals & Hypothesis Testing
 ###Basic Assumptions
-Having each group has a limited number of sample (10 sample) then `t distribution` and `t confidence intervals` are going to be used. Being the guinea pigs used for each measurement distinct from each other within a group and between the groups then the __groups can be considered independent from each other__. Finally looking at the sample standard deviation for the different groups the assumption can be made to treat the diffent variances as equals. 
+Having __each group has a limited number of sample (10 sample)__ then __`t distribution` and `t confidence intervals`__ are going to be used. Being the guinea pigs used for each measurement distinct from each other within a group and between the groups then the __groups can be considered independent from each other__. Finally looking at the __sample standard deviation__ for the different groups the assumption can be made to treat __diffent variances as equals__. 
+
 ###Independent group t confident intervals
-```{r ref.label="confidenceIntervals", echo=FALSE}
+```{r ref.label="tTests", echo=FALSE}
 ```
 
+Group1 | Group2 | t confidence interval (g1, g2)  
+---- | ---- | ----
+OJ, 1.0 | OJ, 0.5 | `r t.testOJ_10_vs_05$conf` 
+OJ, 2.0 | OJ, 0.5 | `r t.testOJ_20_vs_05$conf` 
+OJ, 2.0 | OJ, 1.0 | `r t.testOJ_20_vs_10$conf`
+--- | --- | ---
+VC, 1.0 | VC, 0.5 | `r t.testVC_10_vs_05$conf` 
+VC, 2.0 | VC, 0.5 | `r t.testVC_20_vs_05$conf` 
+VC, 2.0 | VC, 1.0 | `r t.testVC_20_vs_10$conf`
+--- | --- | ---
+OJ, 0.5 | VC, 0.5 | `r t.testVC_10_vs_05$conf` 
+OJ, 1.0 | VC, 1.0 | `r t.testVC_20_vs_05$conf` 
+OJ, 2.0 | VC, 2.0 | `r t.testVC_20_vs_10$conf`
+--- | --- | ---
+OJ, all | VC, all | `r t.testOJ_vs_VC$conf`
+
 ##Appendix
-Code used to create the basic plot to visualize basic information of the rawData. 
+__Code used to create the basic plot to visualize basic information of the rawData.__
 ```{r basicPlot}
+require(graphics)
+rawData_OJ <- rawData[rawData$supp == "OJ",]
+rawData_OJ$doseF <- as.factor(rawData_OJ$dose)
+rawData_VC <- rawData[rawData$supp == "VC",]
+rawData_VC$doseF <- as.factor(rawData_VC$dose)
+
+par(ps = 8, cex.lab = 0.8, mfcol = c(1,2))
+plot(rawData_OJ$dose, rawData_OJ$len, col = c(rawData_OJ$doseF), pch = 20, main ="Length vs. Dose for Orange Juice Supplement", xlab = "mg", ylab ="Tooth Length", ylim=c(0, 40))
+legend("bottomright",cex = 0.6, fill = c("black","red","green"), legend = c("0.5mg","1mg","2mg"))
+
+plot(rawData_VC$dose, rawData_VC$len, col = c(rawData_VC$doseF), pch = 20, main ="Length vs. Dose for Ascorbic Acid Supplement", xlab = "mg", ylab ="Tooth Length", , ylim=c(0, 40))
+legend("bottomright",cex = 0.6, fill = c("black","red","green"), legend = c("0.5mg","1mg","2mg"))
+```
+
+__Code used to prepare the data of the different groups__
+```{r prepareDataGroups}
+len_OJ <- rawData[rawData$supp == "OJ",]$len
+len_OJ_05 <- rawData[rawData$supp == "OJ" & rawData$dose == 0.5,]$len
+len_OJ_10 <- rawData[rawData$supp == "OJ" & rawData$dose == 1.0,]$len
+len_OJ_20 <- rawData[rawData$supp == "OJ" & rawData$dose == 2.0,]$len
+
+len_VC <- rawData[rawData$supp == "VC",]$len
+len_VC_05 <- rawData[rawData$supp == "VC" & rawData$dose == 0.5,]$len
+len_VC_10 <- rawData[rawData$supp == "VC" & rawData$dose == 1.0,]$len
+len_VC_20 <- rawData[rawData$supp == "VC" & rawData$dose == 2.0,]$len
+```
+
+__Code used to calculate basic statistics for the different groups__
+```{r basicStatistics}
+getStatistics <- function(data){
+  return (list(n = length(data), mean = mean(data), sd = round(sd(data),digits = 3)))
+}
+
+##OJ Statistics
+stats_OJ_05 <- getStatistics(len_OJ_05)
+stats_OJ_10 <- getStatistics(len_OJ_10)
+stats_OJ_20 <- getStatistics(len_OJ_20)
+
+##VC Statistics
+stats_VC_05 <- getStatistics(len_VC_05)
+stats_VC_10 <- getStatistics(len_VC_10)
+stats_VC_20 <- getStatistics(len_VC_20)
+```
+
+__Code used to calculate t test between the different groups__
+```{r tTests}
+t.testOJ_10_vs_05 <- t.test(len_OJ_10, len_OJ_05, paired = FALSE, var.equal = TRUE)
+t.testOJ_20_vs_05 <- t.test(len_OJ_20, len_OJ_05, paired = FALSE, var.equal = TRUE)
+t.testOJ_20_vs_10 <- t.test(len_OJ_20, len_OJ_10, paired = FALSE, var.equal = TRUE)
+
+t.testVC_10_vs_05 <- t.test(len_VC_10, len_VC_05, paired = FALSE, var.equal = TRUE)
+t.testVC_20_vs_05 <-t.test(len_VC_20, len_VC_05, paired = FALSE, var.equal = TRUE)
+t.testVC_20_vs_10 <-t.test(len_VC_20, len_VC_10, paired = FALSE, var.equal = TRUE)
+
+t.testOJ_05_vs_VC_05 <- t.test(len_OJ_05, len_VC_05, paired = FALSE, var.equal = TRUE)
+t.testOJ_10_vs_VC_10 <- t.test(len_OJ_10, len_VC_10, paired = FALSE, var.equal = TRUE)
+t.testOJ_20_vs_VC_20 <- t.test(len_OJ_20, len_VC_20, paired = FALSE, var.equal = TRUE)
+
+t.testOJ_vs_VC <- t.test(len_OJ, len_VC, paired = FALSE, var.equal = TRUE)
+```
+
+##T Be removed
+```{r basicPlot1}
 require(graphics)
 par(ps = 8, cex.lab = 0.8)
 coplot(len ~ dose | supp, data = rawData, panel = panel.smooth, xlab = "ToothGrowth data: length vs dose, given type of supplement")
 ```
 
-Code used to calculate basic statistics
-```{r basicStatistics}
+```{r basicStatistics1}
 ##OJ - Orange Juice
 s_lenData_OJ_05 <- rawData[rawData$supp == "OJ" & rawData$dose == 0.5,]$len
 n_OJ_05 <- length(s_lenData_OJ_05)
@@ -85,28 +164,4 @@ s_lenData_VC_20 <- rawData[rawData$supp == "VC" & rawData$dose == 2.0,]$len
 n_VC_20 <- length(s_lenData_VC_20)
 mean_VC_20 <- mean(s_lenData_VC_20)
 sd_VC_20 <- sd(s_lenData_VC_20)
-```
-
-
-```{r confidenceIntervals}
-print("OJ 05 vs. 10")
-t.test(s_lenData_OJ_05, s_lenData_OJ_10, paired = FALSE, var.equal = TRUE)
-print("OJ 05 vs. 20")
-t.test(s_lenData_OJ_05, s_lenData_OJ_20, paired = FALSE, var.equal = TRUE)
-print("OJ 10 vs. 20")
-t.test(s_lenData_OJ_10, s_lenData_OJ_20, paired = FALSE, var.equal = TRUE)
-
-print("VC 05 vs. 10")
-t.test(s_lenData_VC_05, s_lenData_VC_10, paired = FALSE, var.equal = TRUE)
-print("VC 05 vs. 20")
-t.test(s_lenData_VC_05, s_lenData_VC_20, paired = FALSE, var.equal = TRUE)
-print("VC 10 vs. 20")
-t.test(s_lenData_VC_10, s_lenData_VC_20, paired = FALSE, var.equal = TRUE)
-
-print("OJ 05 vs. VC 05")
-t.test(s_lenData_OJ_05, s_lenData_VC_05, paired = FALSE, var.equal = TRUE)
-print("OJ 10 vs.VC 10")
-t.test(s_lenData_OJ_10, s_lenData_VC_10, paired = FALSE, var.equal = TRUE)
-print("OJ 20 vs. VC 20")
-t.test(s_lenData_OJ_20, s_lenData_VC_20, paired = FALSE, var.equal = TRUE)
 ```
