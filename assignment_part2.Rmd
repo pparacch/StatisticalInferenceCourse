@@ -1,7 +1,7 @@
 ---
 title: "ToothGrowth Data Analysis"
 author: "Pier Lorenzo Paracchini"
-output: html_document
+output: word_document
 ---
 ```{r settings, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
 Sys.setlocale("LC_ALL", "C")
@@ -41,7 +41,7 @@ Supp | Dose | No of Sample | Sample mean | Sample SD
 ###Basic Assumptions
 Having __each group has a limited number of sample (10 sample)__ then __`t distribution` and `t confidence intervals`__ are going to be used. Being the guinea pigs used for each measurement distinct from each other within a group and between the groups then the __groups can be considered independent from each other__ and each guinea pig can be considered __iid__. Finally looking at the __sample standard deviation__ for the different groups the assumption can be made to consider  the __diffent variances as equals__. 
 
-###Independent group t confident intervals
+###Independent group t confidence intervals
 ```{r ref.label="tTests", echo=FALSE}
 ```
 
@@ -67,7 +67,27 @@ __Interpretation__
     * __overall__ data, the confidence interval (5) contains zero (with most on the interval above zero) and makes it difficult to interpret the data
     * __data__ for the same `dose` level (e.g 0.5 mg `OJ` vs. 0.5 mg `VC`), the intervals (6)(7)(8) are entirely above zero suggesting again that groups treated with `OJ` have more tooth length than groups treated with `VC` (at 95% confidence)
   
+###Hypothesis Testing
+Let´s perform (two sided) hypothesis testing focusing on the comparison of the 2 different supplements `OJ vs VC` and considering the following hypothesis
 
+* __$H_0 : \mu_1 = \mu_2$__
+* __$H_1 : \mu_1 \neq \mu_2$__
+
+
+__Group1__ | __Group2__ | __t__ | __df__ | __p-value__
+---- | ---- | ---- | ---- | ----
+__OJ, all__ | __VC, all__ | `r t.testOJ_vs_VC$statistic` | `r t.testOJ_vs_VC$parameter` | `r t.testOJ_vs_VC$p.value`
+--- | --- | --- | --- | ---
+__OJ, 0.5__ | __VC, 0.5__ | `r t.testVC_10_vs_05$statistic` | `r t.testVC_10_vs_05$parameter` | `r t.testVC_10_vs_05$p.value`
+__OJ, 1.0__ | __VC, 1.0__ | `r t.testVC_20_vs_05$statistic` | `r t.testVC_20_vs_05$parameter` | `r t.testVC_20_vs_05$p.value`
+__OJ, 2.0__ | __VC, 2.0__ | `r t.testVC_20_vs_10$statistic` | `r t.testVC_20_vs_10$parameter` | `r t.testVC_20_vs_10$p.value`
+
+__Interpretation__  
+Remember the __p-value__ represents the probability of seeing evidence as extreme or more extreme than the one obtained under $H_0$.
+
+* Comparing the __supplement `OJ` vs. `VC`__  
+    * __overall__ data, the __t__value is relevant so __"the $H_0$ hypothesis can be rejected"__ with a __p-value__ around 6%. 
+    * __data__ for the same `dose` level (e.g 0.5 mg `OJ` vs. 0.5 mg `VC`), __t__ values are quite big so it could be said that __"the $H_0$ hypothesis can be rejected"__ and the __p-values__ are very very low therefore a very unlikely event has been observed or, again, the __"the $H_0$ hypothesis is false"__.
 
 ##Appendix
 __Code used to create the basic plot to visualize basic information of the rawData.__
@@ -79,10 +99,10 @@ rawData_VC <- rawData[rawData$supp == "VC",]
 rawData_VC$doseF <- as.factor(rawData_VC$dose)
 
 par(ps = 8, cex.lab = 0.8, mfcol = c(1,2))
-plot(rawData_OJ$dose, rawData_OJ$len, col = c(rawData_OJ$doseF), pch = 20, main ="Length vs. Dose for Orange Juice Supplement", xlab = "dose (mg)", ylab ="Tooth Length", ylim=c(0, 40))
+plot(rawData_OJ$dose, rawData_OJ$len, col = c(rawData_OJ$doseF), pch = 20, main ="Length vs. Dose for Orange Juice Supplement", xlab = "dose (mg)", ylab ="Tooth Length", ylim=c(0, 40), cex.main = 0.8)
 legend("bottomright",cex = 0.6, fill = c("black","red","green"), legend = c("0.5mg","1mg","2mg"))
 
-plot(rawData_VC$dose, rawData_VC$len, col = c(rawData_VC$doseF), pch = 20, main ="Length vs. Dose for Ascorbic Acid Supplement", xlab = "dose (mg)", ylab ="Tooth Length", , ylim=c(0, 40))
+plot(rawData_VC$dose, rawData_VC$len, col = c(rawData_VC$doseF), pch = 20, main ="Length vs. Dose for Ascorbic Acid Supplement", xlab = "dose (mg)", ylab ="Tooth Length", , ylim=c(0, 40), cex.main = 0.8)
 legend("bottomright",cex = 0.6, fill = c("black","red","green"), legend = c("0.5mg","1mg","2mg"))
 ```
 
@@ -116,7 +136,7 @@ stats_VC_10 <- getStatistics(len_VC_10)
 stats_VC_20 <- getStatistics(len_VC_20)
 ```
 
-__Code used to calculate t test between the different groups__
+__Code used to calculate t test data (confidence intervals and hypothesis testing) between the different groups__
 ```{r tTests}
 t.testOJ_10_vs_05 <- t.test(len_OJ_10, len_OJ_05, paired = FALSE, var.equal = TRUE)
 t.testOJ_20_vs_05 <- t.test(len_OJ_20, len_OJ_05, paired = FALSE, var.equal = TRUE)
@@ -133,43 +153,26 @@ t.testOJ_20_vs_VC_20 <- t.test(len_OJ_20, len_VC_20, paired = FALSE, var.equal =
 t.testOJ_vs_VC <- t.test(len_OJ, len_VC, paired = FALSE, var.equal = TRUE)
 ```
 
-##T Be removed
-```{r basicPlot1}
-require(graphics)
-par(ps = 8, cex.lab = 0.8)
-coplot(len ~ dose | supp, data = rawData, panel = panel.smooth, xlab = "ToothGrowth data: length vs dose, given type of supplement")
-```
+__Markdown used for the generation of the different tables__  
+Note in the following markdown the __\`__ has been changed to __'__ in the inline code, in order to be able to show the code itself. 
 
-```{r basicStatistics1}
-##OJ - Orange Juice
-s_lenData_OJ_05 <- rawData[rawData$supp == "OJ" & rawData$dose == 0.5,]$len
-n_OJ_05 <- length(s_lenData_OJ_05)
-mean_OJ_05 <- mean(s_lenData_OJ_05)
-sd_OJ_05 <- sd(s_lenData_OJ_05)
+Table of Sample statistics
 
-s_lenData_OJ_10 <- rawData[rawData$supp == "OJ" & rawData$dose == 1.0,]$len
-n_OJ_10 <- length(s_lenData_OJ_10)
-mean_OJ_10 <- mean(s_lenData_OJ_10)
-sd_OJ_10 <- sd(s_lenData_OJ_10)
+    Supp | Dose | No of Sample | Sample mean | Sample SD 
+    ---- | ---- | ---- | ---- | ----
+    "OJ" | 0.5 | 'r stats_OJ_05$n' | 'r stats_OJ_05$mean' | 'r stats_OJ_05$sd' 
+    ...
 
-s_lenData_OJ_20 <- rawData[rawData$supp == "OJ" & rawData$dose == 2.0,]$len
-n_OJ_20 <- length(s_lenData_OJ_20)
-mean_OJ_20 <- mean(s_lenData_OJ_20)
-sd_OJ_20 <- sd(s_lenData_OJ_20)
+Table of Confidence Intervals
 
-##VC - ascorbic acid
-s_lenData_VC_05 <- rawData[rawData$supp == "VC" & rawData$dose == 0.5,]$len
-n_VC_05 <- length(s_lenData_VC_05)
-mean_VC_05 <- mean(s_lenData_VC_05)
-sd_VC_05 <- sd(s_lenData_VC_05)
+    __Group1__ | __Group2__ | __t confidence interval (g1, g2)__  
+    ---- | ---- | ----
+    __OJ, 1.0__ | __OJ, 0.5__ | 'r t.testOJ_10_vs_05$conf' __(1)__ 
+    ...
 
-s_lenData_VC_10 <- rawData[rawData$supp == "VC" & rawData$dose == 1.0,]$len
-n_VC_10 <- length(s_lenData_VC_10)
-mean_VC_10 <- mean(s_lenData_VC_10)
-sd_VC_10 <- sd(s_lenData_VC_10)
+Table of Hypothesis Testing
 
-s_lenData_VC_20 <- rawData[rawData$supp == "VC" & rawData$dose == 2.0,]$len
-n_VC_20 <- length(s_lenData_VC_20)
-mean_VC_20 <- mean(s_lenData_VC_20)
-sd_VC_20 <- sd(s_lenData_VC_20)
-```
+    __Group1__ | __Group2__ | __t__ | __df__ | __p-value__
+    ---- | ---- | ---- | ---- | ----
+    __OJ, all__ | __VC, all__ | 'r t.testOJ_vs_VC$statistic' | 'r t.testOJ_vs_VC$parameter' | 'r t.testOJ_vs_VC$p.value'
+
