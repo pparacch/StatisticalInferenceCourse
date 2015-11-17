@@ -17,7 +17,7 @@ require(datasets)
 rawData <- ToothGrowth
 str(rawData)
 ```
-The rawdata includes `r dim(rawData)[1]` obs. of `r dim(rawData)[2]` features. Features are `len` the tooth length (`numeric`), `supp` the supplement type (`factor`) and finally `dose` the dose in milligrams (`numeric`). There are 6 possible groups by `supp` and `dose` (see the plot below). For each supplement `supp` ("OJ" and "VC"), there are three different groups based on the `dose` values - 0.5mg, 1mg, 2mg.
+The rawdata includes `r dim(rawData)[1]` obs. of `r dim(rawData)[2]` features. Features are `len` the tooth length (`numeric`), `supp` the supplement type (`factor`) and finally `dose`, the dose in milligrams (`numeric`). There are 6 possible groups by `supp` and `dose` (see the plot below). For each supplement `supp` ("OJ" and "VC"), there are three different groups based on the `dose` values - 0.5mg, 1mg, 2mg.
 
 ```{r ref.label="basicPlot", echo=FALSE}
 ```
@@ -39,27 +39,35 @@ Supp | Dose | No of Sample | Sample mean | Sample SD
 
 ##Confidence Intervals & Hypothesis Testing
 ###Basic Assumptions
-Having __each group has a limited number of sample (10 sample)__ then __`t distribution` and `t confidence intervals`__ are going to be used. Being the guinea pigs used for each measurement distinct from each other within a group and between the groups then the __groups can be considered independent from each other__. Finally looking at the __sample standard deviation__ for the different groups the assumption can be made to treat __diffent variances as equals__. 
+Having __each group has a limited number of sample (10 sample)__ then __`t distribution` and `t confidence intervals`__ are going to be used. Being the guinea pigs used for each measurement distinct from each other within a group and between the groups then the __groups can be considered independent from each other__ and each guinea pig can be considered __iid__. Finally looking at the __sample standard deviation__ for the different groups the assumption can be made to consider  the __diffent variances as equals__. 
 
 ###Independent group t confident intervals
 ```{r ref.label="tTests", echo=FALSE}
 ```
 
-Group1 | Group2 | t confidence interval (g1, g2)  
+__Group1__ | __Group2__ | __t confidence interval (g1, g2)__  
 ---- | ---- | ----
-OJ, 1.0 | OJ, 0.5 | `r t.testOJ_10_vs_05$conf` 
-OJ, 2.0 | OJ, 0.5 | `r t.testOJ_20_vs_05$conf` 
-OJ, 2.0 | OJ, 1.0 | `r t.testOJ_20_vs_10$conf`
+__OJ, 1.0__ | __OJ, 0.5__ | `r t.testOJ_10_vs_05$conf` __(1)__ 
+__OJ, 2.0__ | __OJ, 1.0__ | `r t.testOJ_20_vs_10$conf` __(2)__
 --- | --- | ---
-VC, 1.0 | VC, 0.5 | `r t.testVC_10_vs_05$conf` 
-VC, 2.0 | VC, 0.5 | `r t.testVC_20_vs_05$conf` 
-VC, 2.0 | VC, 1.0 | `r t.testVC_20_vs_10$conf`
+__VC, 1.0__ | __VC, 0.5__ | `r t.testVC_10_vs_05$conf` __(3)__
+__VC, 2.0__ | __VC, 1.0__ | `r t.testVC_20_vs_10$conf` __(4)__
 --- | --- | ---
-OJ, 0.5 | VC, 0.5 | `r t.testVC_10_vs_05$conf` 
-OJ, 1.0 | VC, 1.0 | `r t.testVC_20_vs_05$conf` 
-OJ, 2.0 | VC, 2.0 | `r t.testVC_20_vs_10$conf`
+__OJ, all__ | __VC, all__ | `r t.testOJ_vs_VC$conf` __(5)__
 --- | --- | ---
-OJ, all | VC, all | `r t.testOJ_vs_VC$conf`
+__OJ, 0.5__ | __VC, 0.5__ | `r t.testVC_10_vs_05$conf` __(6)__
+__OJ, 1.0__ | __VC, 1.0__ | `r t.testVC_20_vs_05$conf` __(7)__
+__OJ, 2.0__ | __VC, 2.0__ | `r t.testVC_20_vs_10$conf` __(8)__
+
+__Interpretation__
+
+* __Supplement `OJ` only__, since the intervals (1)(2) are entirely above zero it suggest that groups with a higher dose have more tooth length than groups with a lower dose (at 95% confidence). The same cosideration can be done considering __supplement `VC` only__ see (3)(4).
+
+* Comparing the __supplement `OJ` vs. `VC`__  
+    * __overall__ data, the confidence interval (5) contains zero (with most on the interval above zero) and makes it difficult to interpret the data
+    * __data__ for the same `dose` level (e.g 0.5 mg `OJ` vs. 0.5 mg `VC`), the intervals (6)(7)(8) are entirely above zero suggesting again that groups treated with `OJ` have more tooth length than groups treated with `VC` (at 95% confidence)
+  
+
 
 ##Appendix
 __Code used to create the basic plot to visualize basic information of the rawData.__
@@ -71,10 +79,10 @@ rawData_VC <- rawData[rawData$supp == "VC",]
 rawData_VC$doseF <- as.factor(rawData_VC$dose)
 
 par(ps = 8, cex.lab = 0.8, mfcol = c(1,2))
-plot(rawData_OJ$dose, rawData_OJ$len, col = c(rawData_OJ$doseF), pch = 20, main ="Length vs. Dose for Orange Juice Supplement", xlab = "mg", ylab ="Tooth Length", ylim=c(0, 40))
+plot(rawData_OJ$dose, rawData_OJ$len, col = c(rawData_OJ$doseF), pch = 20, main ="Length vs. Dose for Orange Juice Supplement", xlab = "dose (mg)", ylab ="Tooth Length", ylim=c(0, 40))
 legend("bottomright",cex = 0.6, fill = c("black","red","green"), legend = c("0.5mg","1mg","2mg"))
 
-plot(rawData_VC$dose, rawData_VC$len, col = c(rawData_VC$doseF), pch = 20, main ="Length vs. Dose for Ascorbic Acid Supplement", xlab = "mg", ylab ="Tooth Length", , ylim=c(0, 40))
+plot(rawData_VC$dose, rawData_VC$len, col = c(rawData_VC$doseF), pch = 20, main ="Length vs. Dose for Ascorbic Acid Supplement", xlab = "dose (mg)", ylab ="Tooth Length", , ylim=c(0, 40))
 legend("bottomright",cex = 0.6, fill = c("black","red","green"), legend = c("0.5mg","1mg","2mg"))
 ```
 
