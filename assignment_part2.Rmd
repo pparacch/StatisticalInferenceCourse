@@ -19,10 +19,7 @@ str(rawData)
 ```
 The rawdata includes `r dim(rawData)[1]` obs. of `r dim(rawData)[2]` features. Features are `len` the tooth length (`numeric`), `supp` the supplement type (`factor`) and finally `dose`, the dose in milligrams (`numeric`). There are 6 possible groups by `supp` and `dose` (see the plot below). For each supplement `supp` ("OJ" and "VC"), there are three different groups based on the `dose` values - 0.5mg, 1mg, 2mg.
 
-```{r ref.label="basicPlot", echo=FALSE}
-```
-
-And here some basic statics about the sample tooth length for each group.
+Here some basic statics about the sample tooth length for each group.
 ```{r ref.label="prepareDataGroups", echo=FALSE}
 ```
 ```{r ref.label="basicStatistics", echo=FALSE}
@@ -36,6 +33,9 @@ Supp | Dose | No of Sample | Sample mean | Sample SD
 "VC" | 0.5 | `r stats_VC_05$n` | `r stats_VC_05$mean` | `r stats_VC_05$sd` 
 "VC" | 1.0 | `r stats_VC_10$n` | `r stats_VC_10$mean` | `r stats_VC_10$sd`
 "VC" | 2.0 | `r stats_VC_20$n` | `r stats_VC_20$mean` | `r stats_VC_20$sd` 
+
+```{r ref.label="basicPlot", echo=FALSE}
+```
 
 ##Confidence Intervals & Hypothesis Testing
 ###Basic Assumptions
